@@ -1,8 +1,10 @@
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, FileText, Calendar, CreditCard, Sparkles, Bot, Phone, Instagram, Linkedin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, FileText, Calendar, CreditCard, Sparkles, Bot, Phone, Instagram, Linkedin, PenTool } from "lucide-react";
 
 const stats = [
   { label: "Total Leads", value: "1,247", icon: Users, change: "+12%" },
