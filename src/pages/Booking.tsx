@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileText, Linkedin, PenTool, Users, ArrowRight, Check } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const services = [
   {
@@ -17,7 +18,8 @@ const services = [
     icon: FileText,
     title: "Resume Review",
     description: "Professional AI-powered resume review with detailed feedback, keyword optimization, and ATS scoring.",
-    price: "₹499",
+    price: 499,
+    priceLabel: "₹499",
     duration: "30 min",
     features: ["ATS Score Check", "Keyword Optimization", "Format Review", "Actionable Feedback"],
   },
@@ -26,7 +28,8 @@ const services = [
     icon: Linkedin,
     title: "LinkedIn Optimization",
     description: "Complete LinkedIn profile overhaul — headline, summary, experience, and networking strategy.",
-    price: "₹799",
+    price: 799,
+    priceLabel: "₹799",
     duration: "45 min",
     features: ["Headline Optimization", "Summary Rewrite", "Keyword Strategy", "Content Plan"],
   },
@@ -35,7 +38,8 @@ const services = [
     icon: PenTool,
     title: "Ghostwriting",
     description: "Professional content writing for LinkedIn posts, articles, and personal brand building.",
-    price: "₹999",
+    price: 999,
+    priceLabel: "₹999",
     duration: "Custom",
     features: ["LinkedIn Posts", "Articles", "Thought Leadership", "Brand Voice"],
   },
@@ -44,7 +48,8 @@ const services = [
     icon: Users,
     title: "Personal Mentorship",
     description: "One-on-one career mentoring sessions for clarity, confidence, and direction.",
-    price: "₹1,499",
+    price: 1499,
+    priceLabel: "₹1,499",
     duration: "60 min",
     features: ["Career Direction", "Confidence Building", "Goal Setting", "Action Plan"],
   },
@@ -52,25 +57,102 @@ const services = [
 
 const timeSlots = ["9:00 AM", "10:00 AM", "11:00 AM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"];
 
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 const Booking = () => {
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const [selectedService, setSelectedService] = useState<string | null>(searchParams.get("service"));
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(selectedService ? 1 : 1);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleBook = () => {
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => { document.body.removeChild(script); };
+  }, []);
+
+  const handlePayment = async () => {
     if (!form.name || !form.email || !form.phone) {
       toast.error("Please fill all fields");
       return;
     }
-    // TODO: Razorpay integration + Supabase storage
-    toast.success("Booking request submitted! We'll confirm your slot shortly.");
-    setStep(1);
-    setSelectedService(null);
-    setSelectedDate(undefined);
-    setSelectedTime(null);
-    setForm({ name: "", email: "", phone: "" });
+    if (!selectedService || !selectedDate || !selectedTime) return;
+
+    const service = services.find((s) => s.id === selectedService);
+    if (!service) return;
+
+    setIsProcessing(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("create-razorpay-order", {
+        body: {
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          service_type: selectedService,
+          booking_date: selectedDate.toISOString().split("T")[0],
+          time_slot: selectedTime,
+          amount: service.price,
+        },
+      });
+
+      if (error || !data?.order_id) {
+        toast.error("Failed to create order. Please try again.");
+        setIsProcessing(false);
+        return;
+      }
+
+      const options = {
+        key: data.key_id,
+        amount: service.price * 100,
+        currency: "INR",
+        name: "BrandUp",
+        description: `${service.title} - ${selectedTime} on ${selectedDate.toLocaleDateString()}`,
+        order_id: data.order_id,
+        prefill: { name: form.name, email: form.email, contact: form.phone },
+        theme: { color: "#7C3AED" },
+        handler: async (response: any) => {
+          const { error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+            body: {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            },
+          });
+
+          if (verifyError) {
+            toast.error("Payment verification failed. Contact support.");
+          } else {
+            toast.success("Payment successful! Your session is booked. 🎉");
+            setStep(1);
+            setSelectedService(null);
+            setSelectedDate(undefined);
+            setSelectedTime(null);
+            setForm({ name: "", email: "", phone: "" });
+          }
+          setIsProcessing(false);
+        },
+        modal: {
+          ondismiss: () => setIsProcessing(false),
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error("Payment error:", err);
+      toast.error("Something went wrong. Please try again.");
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -114,7 +196,7 @@ const Booking = () => {
                   <h3 className="font-heading font-semibold mb-1 text-foreground">{s.title}</h3>
                   <p className="text-xs text-muted-foreground mb-3">{s.description}</p>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="font-heading font-bold text-lg text-foreground">{s.price}</span>
+                    <span className="font-heading font-bold text-lg text-foreground">{s.priceLabel}</span>
                     <Badge variant="secondary" className="text-xs">{s.duration}</Badge>
                   </div>
                   <ul className="space-y-1">
@@ -184,8 +266,8 @@ const Booking = () => {
                   <Label>Phone</Label>
                   <Input type="tel" placeholder="+91 98765 43210" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} maxLength={20} />
                 </div>
-                <Button onClick={handleBook} className="w-full gradient-bg border-0 text-primary-foreground">
-                  Proceed to Payment (Razorpay)
+                <Button onClick={handlePayment} disabled={isProcessing} className="w-full gradient-bg border-0 text-primary-foreground">
+                  {isProcessing ? "Processing..." : `Pay ${services.find(s => s.id === selectedService)?.priceLabel || ""} with Razorpay`}
                 </Button>
               </CardContent>
             </Card>
