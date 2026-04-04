@@ -69,8 +69,9 @@ const Booking = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
-  const [step, setStep] = useState(selectedService ? 1 : 1);
+  const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   useEffect(() => {
     const script = document.createElement("script");
