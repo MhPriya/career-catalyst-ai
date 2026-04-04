@@ -152,6 +152,36 @@ const Booking = () => {
     }
   };
 
+  if (paymentSuccess) {
+    const service = services.find((s) => s.id === selectedService);
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 pt-28 pb-16 text-center max-w-lg">
+          <div className="w-20 h-20 rounded-full gradient-bg flex items-center justify-center mx-auto mb-6">
+            <Check className="h-10 w-10 text-primary-foreground" />
+          </div>
+          <h1 className="font-heading text-3xl font-bold mb-3 text-foreground">Booking Confirmed! 🎉</h1>
+          <p className="text-muted-foreground mb-6">
+            Thank you, <strong className="text-foreground">{form.name}</strong>! Your <strong className="text-foreground">{service?.title}</strong> session is booked for{" "}
+            <strong className="text-foreground">{selectedDate?.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}</strong> at{" "}
+            <strong className="text-foreground">{selectedTime}</strong>.
+          </p>
+          <p className="text-sm text-muted-foreground mb-8">A confirmation email will be sent to <strong>{form.email}</strong>.</p>
+          <div className="flex gap-3 justify-center">
+            <Link to="/">
+              <Button variant="outline">Go Home</Button>
+            </Link>
+            <Button onClick={() => { setPaymentSuccess(false); setStep(1); setSelectedService(null); setSelectedDate(undefined); setSelectedTime(null); setForm({ name: "", email: "", phone: "" }); }} className="gradient-bg border-0 text-primary-foreground">
+              Book Another
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
