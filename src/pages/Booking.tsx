@@ -133,12 +133,8 @@ const Booking = () => {
           if (verifyError) {
             toast.error("Payment verification failed. Contact support.");
           } else {
+            setPaymentSuccess(true);
             toast.success("Payment successful! Your session is booked. 🎉");
-            setStep(1);
-            setSelectedService(null);
-            setSelectedDate(undefined);
-            setSelectedTime(null);
-            setForm({ name: "", email: "", phone: "" });
           }
           setIsProcessing(false);
         },
