@@ -1,8 +1,10 @@
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, FileText, Calendar, CreditCard, Sparkles, Bot, Phone, Instagram, Linkedin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, FileText, Calendar, CreditCard, Sparkles, Bot, Phone, Instagram, Linkedin, PenTool } from "lucide-react";
 
 const stats = [
   { label: "Total Leads", value: "1,247", icon: Users, change: "+12%" },
@@ -24,10 +26,17 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 pt-28 pb-16">
-        <div className="mb-8">
-          <h1 className="font-heading text-3xl font-bold text-foreground">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Overview of your personal brand platform.</p>
-        </div>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="font-heading text-3xl font-bold text-foreground">Admin Dashboard</h1>
+              <p className="text-muted-foreground">Overview of your personal brand platform.</p>
+            </div>
+            <Link to="/admin/blog">
+              <Button className="gradient-bg border-0 text-primary-foreground">
+                <PenTool className="h-4 w-4 mr-2" /> Manage Blog
+              </Button>
+            </Link>
+          </div>
 
         {/* Stats */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
