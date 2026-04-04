@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          amount: number
+          booking_date: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          payment_status: string
+          phone: string
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          service_type: string
+          time_slot: string
+        }
+        Insert: {
+          amount: number
+          booking_date: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          payment_status?: string
+          phone: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          service_type: string
+          time_slot: string
+        }
+        Update: {
+          amount?: number
+          booking_date?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          payment_status?: string
+          phone?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          service_type?: string
+          time_slot?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
