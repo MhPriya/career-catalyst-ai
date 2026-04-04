@@ -43,7 +43,7 @@ const BlogPost = () => {
       if (data?.tags?.length) {
         const { data: rel } = await supabase
           .from("blog_posts")
-          .select("id, title, slug, excerpt, featured_image, tags, created_at")
+          .select("*")
           .eq("published", true)
           .neq("id", data.id)
           .overlaps("tags", data.tags)
