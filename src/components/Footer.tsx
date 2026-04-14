@@ -12,7 +12,7 @@ const Footer = () => {
               <span className="font-heading text-lg font-bold text-foreground">BrandUp</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              AI-powered career guidance, motivation, and personal branding for the next generation of professionals.
+              AI-powered career solutions to enhance your resume, optimize LinkedIn, and build a strong personal brand—helping you unlock opportunities and secure your offer.
             </p>
           </div>
 
@@ -51,7 +51,7 @@ const Footer = () => {
             <h4 className="font-heading font-semibold mb-4 text-foreground">Contact</h4>
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" /> hello@brandup.com
+                <Mail className="h-4 w-4" /> careercatalystai99@gmail.com
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4" /> +91 98765 43210
